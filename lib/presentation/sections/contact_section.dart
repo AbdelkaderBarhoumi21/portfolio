@@ -1,289 +1,236 @@
-// Contact section.
+// Contact — the closing shot.
 //
-// Composition:
-//   - SectionTitle "Let's build something great together"
-//     (eyebrow "05 / contact")
-//   - Short framing line
-//   - Three glass channel tiles: Email / LinkedIn / GitHub
-//     Each tile is a clickable <a> styled as a glass card, with an
-//     inline SVG icon (pulled from the SocialLink it represents) and a
-//     short label/value pair.
-//   - Primary CTA button under the tiles linking to mailto:
+//   (07) CONTACT ───────────────────────────────────────
+//   Let's build
+//   something great.                      (giant, line reveal)
 //
-// No contact form / backend — the brief explicitly asks for a mailto-only
-// flow and this is a static SSG site.
+//   Availability copy.                    Email      abdel…@gmail.com ↗
+//   abdelkader…@gmail.com  ↗              Phone      +216 …
+//   [Copy email] [Download CV]            LinkedIn   in/…
+//                                         GitHub     …
 
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../../core/constants/app_anchors.dart';
+import '../../core/constants/ui_icons.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/global_styles.dart';
 import '../../data/profile_data.dart';
-import '../../domain/models/social_link.dart';
-import '../widgets/neon_button.dart';
-import '../widgets/reveal_on_scroll.dart';
-import '../widgets/section_container.dart';
-import '../widgets/section_title.dart';
+import '../widgets/pill_button.dart';
+import '../widgets/split_lines.dart';
 
 class ContactSection extends StatelessComponent {
   const ContactSection({super.key});
 
-  // Map the three channels back to their inline-SVG icons in ProfileData.
-  // Resolved by `label` so it survives reordering the socials list.
-  static SocialLink _findIcon(String label) => ProfileData.socials.firstWhere((social) => social.label == label);
-
   @override
   Component build(BuildContext context) {
-    final email = _findIcon('Email');
-    final linkedin = _findIcon('LinkedIn');
-    final github = _findIcon('GitHub');
+    final rows = [
+      (label: 'Email', value: ProfileData.email, href: ProfileData.mailto, external: false),
+      (label: 'Phone', value: ProfileData.phone, href: ProfileData.telHref, external: false),
+      (label: 'LinkedIn', value: ProfileData.linkedinHandle, href: ProfileData.linkedin, external: true),
+      (label: 'GitHub', value: ProfileData.githubHandle, href: ProfileData.github, external: true),
+    ];
 
-    return SectionContainer(
-      id: AppAnchors.contact,
-      children: [
-        const SectionTitle(
-          eyebrow: '05 / contact',
-          title: "Let’s build something great together",
-        ),
-
-        RevealOnScroll(
-          direction: RevealDirection.up,
-          children: [
-            p(classes: 'contact__intro', [
-              Component.text(
-                "I’m open to mobile engineering roles, freelance builds, and "
-                "interesting collaborations. The fastest way to reach me is by "
-                "email — I usually reply within a day.",
-              ),
-            ]),
-          ],
-        ),
-
-        div(classes: 'contact__grid stagger', [
-          _ChannelTile(
-            link: email,
-            value: ProfileData.email,
-            staggerIndex: 0,
-          ),
-          _ChannelTile(
-            link: linkedin,
-            value: 'in/barhoumi23176',
-            staggerIndex: 1,
-          ),
-          _ChannelTile(
-            link: github,
-            value: '@AbdelkaderBarhoumi21',
-            staggerIndex: 2,
+    return section(id: AppAnchors.contact, classes: 'section contact', [
+      div(classes: 'contact__glow', attributes: const {'aria-hidden': 'true'}, []),
+      div(classes: 'container', [
+        div(classes: 'shead__meta', [
+          span(classes: 'label shead__index', [Component.text('(07)')]),
+          span(classes: 'label', [Component.text('Contact')]),
+          span(
+            classes: 'shead__rule',
+            attributes: const {'data-reveal': 'line', 'aria-hidden': 'true'},
+            [],
           ),
         ]),
+        const SplitLines(['Let\'s build', 'something _great._'], classes: 'contact__title'),
 
-        RevealOnScroll(
-          direction: RevealDirection.up,
-          extraClasses: 'contact__cta-wrap',
-          children: [
-            const NeonButton(
-              label: 'Say hi via email',
+        div(classes: 'contact__grid', [
+          div(classes: 'contact__main', attributes: const {'data-reveal': ''}, [
+            p(classes: 'contact__lede', [Component.text(ProfileData.availability)]),
+            a(
               href: ProfileData.mailto,
+              classes: 'contact__email',
+              attributes: const {'data-cursor': 'Say hi'},
+              [
+                span(classes: 'hover-line', [Component.text(ProfileData.email)]),
+                span(classes: 'contact__email-icon', [RawText(UiIcons.arrowUpRight)]),
+              ],
             ),
-          ],
-        ),
-      ],
-    );
+            div(classes: 'contact__actions', [
+              button(
+                type: ButtonType.button,
+                classes: 'copy-btn',
+                attributes: const {
+                  'data-copy': ProfileData.email,
+                  'data-copied': 'Copied to clipboard',
+                },
+                [
+                  span(classes: 'copy-btn__icon', [RawText(UiIcons.copy)]),
+                  span(attributes: const {'data-copy-label': ''}, [Component.text('Copy email')]),
+                ],
+              ),
+              PillButton(
+                label: 'Download CV',
+                href: ProfileData.cvPath,
+                variant: PillVariant.ghost,
+                icon: UiIcons.download,
+                download: true,
+              ),
+            ]),
+          ]),
+          dl(classes: 'contact__list', [
+            for (var i = 0; i < rows.length; i++)
+              div(
+                classes: 'contact__row',
+                attributes: {'data-reveal': '', 'style': '--d: ${i * 80}ms'},
+                [
+                  dt(classes: 'label', [Component.text(rows[i].label)]),
+                  dd([
+                    a(
+                      href: rows[i].href,
+                      target: rows[i].external ? Target.blank : null,
+                      attributes: rows[i].external ? const {'rel': 'noopener noreferrer'} : null,
+                      [
+                        span(classes: 'hover-line', [Component.text(rows[i].value)]),
+                        span(classes: 'contact__row-icon', [RawText(UiIcons.arrowUpRight)]),
+                      ],
+                    ),
+                  ]),
+                ],
+              ),
+            div(
+              classes: 'contact__row',
+              attributes: const {'data-reveal': '', 'style': '--d: 320ms'},
+              [
+                dt(classes: 'label', [Component.text('Location')]),
+                dd([Component.text(ProfileData.location)]),
+              ],
+            ),
+          ]),
+        ]),
+      ]),
+    ]);
   }
 
   @css
   static List<StyleRule> get styles => [
-    // ----- Intro line -----
-    css('.contact__intro').styles(
-      maxWidth: 580.px,
-      margin: Margin.only(bottom: AppSpacing.lg.rem),
-      color: AppColors.textSecondary,
-      fontSize: 1.0.rem,
-      lineHeight: const Unit.expression('${AppTypography.lineHeightBody}'),
-    ),
-
-    // ----- Tile grid -----
-    // Mobile: single column, tight gaps.
-    // bpMd+ : 3 columns side-by-side.
-    //
-    // `minmax(0, 1fr)` is the standard CSS Grid escape hatch — without
-    // the `0` min, a long child (the email address) would force the
-    // column wider than 1fr and collapse the grid back to 1 column.
-    css('.contact__grid').styles(
-      display: Display.grid,
-      margin: Margin.only(bottom: AppSpacing.lg.rem),
-      gap: const Gap(row: Unit.rem(0.6), column: Unit.rem(0.75)),
-      raw: {'grid-template-columns': 'minmax(0, 1fr)'},
-    ),
-    // Each grid cell is a RevealOnScroll wrapper div; we need it to
-    // stretch full-width AND allow its content to shrink so the email
-    // ellipsis can kick in inside a 1/3-width column.
-    css('.contact__grid > *').styles(
-      width: 100.percent,
-      raw: {'min-width': '0'},
-    ),
-    // Tablet and up — go straight to 3 columns. We deliberately do
-    // NOT wait for bpMd (768px) here; the rows are compact enough
-    // that even a 600px-wide tablet fits all three.
-    css.media(MediaQuery.raw('(min-width: 600px)'), [
-      css('.contact__grid').styles(
-        raw: {
-          'grid-template-columns': 'repeat(3, minmax(0, 1fr))',
-        },
-      ),
+    css('.contact').styles(raw: {
+      'overflow': 'hidden',
+      'padding-bottom': 'clamp(4rem, 9vw, 8rem)',
+    }),
+    css('.contact__glow').styles(raw: {
+      'position': 'absolute',
+      'left': '50%',
+      'bottom': '-35vw',
+      'width': '90vw',
+      'height': '60vw',
+      'transform': 'translateX(-50%)',
+      'border-radius': '50%',
+      'background':
+          'radial-gradient(closest-side, '
+          'color-mix(in srgb, var(--primary) 34%, transparent), transparent)',
+      'filter': 'blur(30px)',
+      'pointer-events': 'none',
+    }),
+    css('.contact .container').styles(raw: {'position': 'relative'}),
+    css('.contact__title').styles(raw: {
+      'font-size': 'clamp(3.2rem, 11.5vw, 12rem)',
+      'line-height': '0.88',
+      'letter-spacing': '-0.06em',
+    }),
+    css('.contact__grid').styles(raw: {
+      'display': 'grid',
+      'gap': '3.5rem',
+      'margin-top': 'clamp(3rem, 7vw, 6rem)',
+    }),
+    css('.contact__lede').styles(raw: {
+      'max-width': '44ch',
+      'font-size': 'var(--fs-body-lg)',
+    }),
+    css('.contact__email').styles(raw: {
+      'display': 'inline-flex',
+      'align-items': 'center',
+      'gap': '0.4em',
+      'margin-top': '1.75rem',
+      'font-family': 'var(--font-display)',
+      'font-size': 'clamp(1.15rem, 2.4vw, 2.45rem)',
+      'font-weight': '500',
+      'letter-spacing': '-0.035em',
+      'color': 'var(--text)',
+      'overflow-wrap': 'anywhere',
+    }),
+    css('.contact__email-icon').styles(raw: {
+      'display': 'inline-flex',
+      'flex-shrink': '0',
+      'color': 'var(--primary)',
+      'transition': 'transform 0.6s var(--ease-expo)',
+    }),
+    css('.contact__email:hover .contact__email-icon').styles(raw: {
+      'transform': 'translate(0.12em, -0.12em)',
+    }),
+    css('.contact__actions').styles(raw: {
+      'display': 'flex',
+      'flex-wrap': 'wrap',
+      'gap': '0.75rem',
+      'margin-top': '2rem',
+    }),
+    css('.copy-btn').styles(raw: {
+      'display': 'inline-flex',
+      'align-items': 'center',
+      'gap': '0.6rem',
+      'height': '3.4rem',
+      'padding': '0 1.4rem',
+      'border-radius': '999px',
+      'background': 'var(--text)',
+      'color': 'var(--bg)',
+      'font-size': '0.95rem',
+      'font-weight': '500',
+      'transition': 'background 0.4s var(--ease-out), color 0.4s var(--ease-out)',
+    }),
+    css('.copy-btn:hover').styles(raw: {'background': 'var(--primary)', 'color': '#FFFFFF'}),
+    css('.copy-btn.is-copied').styles(raw: {'background': 'var(--success)', 'color': '#0B0B0E'}),
+    css('.copy-btn__icon').styles(raw: {'display': 'inline-flex'}),
+    css('.contact__list').styles(raw: {'border-top': '1px solid var(--line)'}),
+    css('.contact__row').styles(raw: {
+      'display': 'grid',
+      'grid-template-columns': '6.5rem minmax(0, 1fr)',
+      'align-items': 'baseline',
+      'gap': '1rem',
+      'padding-block': '1.15rem',
+      'border-bottom': '1px solid var(--line)',
+    }),
+    css('.contact__row dd').styles(raw: {
+      'color': 'var(--text)',
+      'overflow-wrap': 'anywhere',
+    }),
+    css('.contact__row a').styles(raw: {
+      'display': 'inline-flex',
+      'align-items': 'center',
+      'gap': '0.4rem',
+    }),
+    css('.contact__row-icon').styles(raw: {
+      'display': 'inline-flex',
+      'color': 'var(--text-faint)',
+      'transition': 'color 0.4s var(--ease-out), transform 0.6s var(--ease-expo)',
+    }),
+    css('.contact__row a:hover .contact__row-icon').styles(raw: {
+      'color': 'var(--text)',
+      'transform': 'translate(2px, -2px)',
+    }),
+    css.media(maxWidth(AppSpacing.bpSm), [
+      css('.contact__row').styles(raw: {
+        'grid-template-columns': '5.25rem minmax(0, 1fr)',
+        'font-size': '0.92rem',
+      }),
     ]),
-
-    // ----- Tile (the clickable card) -----
-    // Horizontal layout: [icon] [text-col] [arrow]
-    // Compact vertical padding so the row is ~64px tall on mobile.
-    css('.channel-tile').styles(
-      display: Display.flex,
-      padding: Padding.symmetric(horizontal: AppSpacing.md.rem, vertical: 0.75.rem),
-      alignItems: AlignItems.center,
-      gap: Gap(column: AppSpacing.md.rem),
-      color: AppColors.textPrimary,
-      textDecoration: const TextDecoration(line: TextDecorationLine.none),
-      raw: {
-        'border-radius': '${AppSpacing.radiusMd}px',
-        'transition':
-            'transform 220ms var(--ease-out), '
-            'box-shadow 220ms var(--ease-out), '
-            'border-color 220ms var(--ease-out)',
-      },
-    ),
-    css('.channel-tile:hover').styles(
-      raw: {
-        'transform': 'translateY(-2px)',
-        'box-shadow': '0 10px 24px -10px rgba(108, 99, 255, 0.45)',
-        'border-color': 'rgba(108, 99, 255, 0.40)',
-      },
-    ),
-    css('.channel-tile:hover .channel-tile__arrow').styles(
-      color: AppColors.textPrimary,
-      raw: {'transform': 'translateX(2px)'},
-    ),
-
-    // Icon halo — smaller (36px) than before, sits on the left.
-    css('.channel-tile__icon').styles(
-      display: Display.inlineFlex,
-      width: 36.px,
-      height: 36.px,
-      justifyContent: JustifyContent.center,
-      alignItems: AlignItems.center,
-      color: AppColors.secondary,
-      raw: {
-        'background': 'rgba(0, 217, 255, 0.10)',
-        'border': '1px solid rgba(0, 217, 255, 0.22)',
-        'border-radius': '${AppSpacing.radiusSm}px',
-        'flex': '0 0 36px',
-      },
-    ),
-    css('.channel-tile__icon svg').styles(
-      display: Display.block,
-      width: 16.px,
-      height: 16.px,
-    ),
-
-    // Text column — label tiny on top, value bigger below.
-    css('.channel-tile__text').styles(
-      display: Display.flex,
-      flexDirection: FlexDirection.column,
-      gap: Gap(row: 0.05.rem),
-      raw: {'flex': '1 1 auto', 'min-width': '0'},
-    ),
-    css('.channel-tile__label').styles(
-      color: AppColors.textMuted,
-      fontFamily: const FontFamily.list([
-        AppTypography.fontMono,
-        FontFamilies.monospace,
-      ]),
-      fontSize: AppTypography.eyebrowSize,
-      textTransform: TextTransform.upperCase,
-      letterSpacing: AppTypography.letterSpacingEyebrow,
-    ),
-    css('.channel-tile__value').styles(
-      color: AppColors.textPrimary,
-      fontSize: 0.92.rem,
-      fontWeight: AppTypography.semibold,
-      raw: {
-        'overflow': 'hidden',
-        'text-overflow': 'ellipsis',
-        'white-space': 'nowrap',
-      },
-    ),
-
-    // Trailing arrow glyph — muted, leans right on hover.
-    css('.channel-tile__arrow').styles(
-      color: AppColors.textMuted,
-      fontFamily: const FontFamily.list([
-        AppTypography.fontMono,
-        FontFamilies.monospace,
-      ]),
-      fontSize: 1.0.rem,
-      raw: {
-        'transition':
-            'color 200ms var(--ease-out), '
-            'transform 200ms var(--ease-out)',
-        'flex': '0 0 auto',
-      },
-    ),
-
-    // ----- CTA wrapper -----
-    css('.contact__cta-wrap').styles(
-      display: Display.flex,
-      justifyContent: JustifyContent.center,
-    ),
+    css.media(minWidth(AppSpacing.bpLg), [
+      css('.contact__grid').styles(raw: {
+        'grid-template-columns': 'minmax(0, 1.25fr) minmax(0, 1fr)',
+        'align-items': 'end',
+        'gap': '6vw',
+      }),
+    ]),
   ];
-}
-
-// Private composition — one clickable contact channel tile.
-class _ChannelTile extends StatelessComponent {
-  const _ChannelTile({
-    required this.link,
-    required this.value,
-    required this.staggerIndex,
-  });
-
-  /// The SocialLink whose `iconSvg`, `label`, and `url` drive the tile.
-  final SocialLink link;
-
-  /// Human-readable handle/address shown below the label
-  /// (e.g. the full email, "in/barhoumi23176", "@AbdelkaderBarhoumi21").
-  final String value;
-
-  final int staggerIndex;
-
-  @override
-  Component build(BuildContext context) {
-    final isExternal = link.url.startsWith('http');
-    return RevealOnScroll(
-      direction: RevealDirection.up,
-      staggerIndex: staggerIndex,
-      children: [
-        a(
-          href: link.url,
-          target: isExternal ? Target.blank : null,
-          attributes: isExternal ? const {'rel': 'noopener noreferrer'} : null,
-          classes: 'channel-tile glass',
-          [
-            // Icon halo (left).
-            span(classes: 'channel-tile__icon', [RawText(link.iconSvg)]),
-            // Text column (right): tiny eyebrow label + handle/value.
-            div(classes: 'channel-tile__text', [
-              span(classes: 'channel-tile__label', [
-                Component.text(link.label),
-              ]),
-              span(classes: 'channel-tile__value', [
-                Component.text(value),
-              ]),
-            ]),
-            // Action glyph in the far right (↗ for external, → for mailto).
-            span(classes: 'channel-tile__arrow mono', [
-              Component.text(isExternal ? '↗' : '→'),
-            ]),
-          ],
-        ),
-      ],
-    );
-  }
 }
