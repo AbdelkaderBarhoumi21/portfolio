@@ -76,7 +76,7 @@ class WorkCard extends StatelessComponent {
             [Component.text(_two(index + 1))],
           ),
           div(classes: 'wcard__phone', attributes: const {'data-parallax': '0.08'}, [
-            PhoneMockup(title: w.name, eyebrow: w.category, mock: w.mock),
+            _visual(w),
           ]),
           span(classes: 'wcard__float', [
             span(classes: 'wcard__dot', []),
@@ -84,6 +84,39 @@ class WorkCard extends StatelessComponent {
           ]),
         ]),
         div(classes: 'wcard__shade', attributes: const {'data-shade': ''}, []),
+      ],
+    );
+  }
+
+  /// Real screenshot in a phone, a tilted poster for store art, or the
+  /// drawn mock when no screenshot exists.
+  Component _visual(FeaturedProject w) {
+    final shot = w.screenshot;
+    final alt = '${w.name} app screen';
+    if (shot == null) {
+      return PhoneMockup(title: w.name, eyebrow: w.category, mock: w.mock);
+    }
+    if (shot.framed) {
+      return PhoneMockup(
+        title: w.name,
+        eyebrow: w.category,
+        mock: w.mock,
+        imageSrc: shot.path,
+        imageAlt: alt,
+      );
+    }
+    return div(
+      classes: 'wcard__poster',
+      attributes: {'style': 'aspect-ratio: ${shot.width} / ${shot.height}'},
+      [
+        img(
+          src: shot.path,
+          alt: alt,
+          width: shot.width,
+          height: shot.height,
+          loading: MediaLoading.lazy,
+          attributes: const {'decoding': 'async'},
+        ),
       ],
     );
   }
@@ -231,6 +264,27 @@ class WorkCard extends StatelessComponent {
       'transition': 'transform 1.2s var(--ease-expo)',
     }),
     css('.wcard:hover .wcard__phone .phone').styles(raw: {
+      'transform': 'rotate(-2deg) translateY(-8px)',
+    }),
+    // Store/marketing art shown as a tilted poster instead of a phone.
+    css('.wcard__poster').styles(raw: {
+      'width': 'clamp(220px, 21vw, 320px)',
+      'border-radius': 'var(--radius-lg)',
+      'overflow': 'hidden',
+      'transform': 'rotate(-5deg)',
+      'transition': 'transform 1.2s var(--ease-expo)',
+      'box-shadow':
+          '0 0 0 1px rgba(255, 255, 255, 0.08), '
+          '0 50px 100px -30px rgba(0, 0, 0, 0.85), '
+          '0 0 140px -40px color-mix(in srgb, var(--tone) 70%, transparent)',
+    }),
+    css('.wcard__poster img').styles(raw: {
+      'display': 'block',
+      'width': '100%',
+      'height': '100%',
+      'object-fit': 'cover',
+    }),
+    css('.wcard:hover .wcard__poster').styles(raw: {
       'transform': 'rotate(-2deg) translateY(-8px)',
     }),
     css('.wcard__float').styles(raw: {

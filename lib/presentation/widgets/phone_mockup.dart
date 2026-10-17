@@ -16,6 +16,8 @@ class PhoneMockup extends StatelessComponent {
     required this.title,
     required this.eyebrow,
     required this.mock,
+    this.imageSrc,
+    this.imageAlt,
     super.key,
   });
 
@@ -28,8 +30,27 @@ class PhoneMockup extends StatelessComponent {
   /// 'fitness' | 'bowling' | 'commerce' | 'iot'.
   final String mock;
 
+  /// Real screenshot. When set it fills the screen and replaces the
+  /// drawn `mock` UI (the device frame and island stay).
+  final String? imageSrc;
+  final String? imageAlt;
+
   @override
   Component build(BuildContext context) {
+    if (imageSrc != null) {
+      return div(classes: 'phone', [
+        div(classes: 'phone__screen phone__screen--shot', [
+          img(
+            src: imageSrc!,
+            alt: imageAlt ?? '',
+            classes: 'phone__shot',
+            loading: MediaLoading.lazy,
+            attributes: const {'decoding': 'async'},
+          ),
+          div(classes: 'phone__island', attributes: const {'aria-hidden': 'true'}, []),
+        ]),
+      ]);
+    }
     return div(
       classes: 'phone',
       attributes: {'aria-hidden': 'true', 'data-mock': mock},
@@ -188,6 +209,16 @@ class PhoneMockup extends StatelessComponent {
       'pointer-events': 'none',
     }),
     css('.phone__screen > *').styles(raw: {'position': 'relative'}),
+    // Screenshot mode: the image fills the glass edge to edge.
+    css('.phone__screen--shot').styles(raw: {'padding': '0', 'gap': '0'}),
+    css('.phone__screen--shot::before').styles(raw: {'display': 'none'}),
+    css('.phone__shot').styles(raw: {
+      'display': 'block',
+      'width': '100%',
+      'height': '100%',
+      'object-fit': 'cover',
+      'object-position': 'top center',
+    }),
     css('.phone__island').styles(raw: {
       'position': 'absolute !important',
       'top': '3.4cqw',

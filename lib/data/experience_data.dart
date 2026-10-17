@@ -65,7 +65,7 @@ const List<Experience> experiences = [
     employment: 'Contract · Remote',
     period: 'Oct 2025 — Dec 2025',
     bullets: [
-      'Built a healthcare app (appointments, patient profiles, notifications, role-based access control) published to Google Play and the App Store.',
+      'Built Medlink, a healthcare app (appointments, patient profiles, notifications, role-based access control) published to Google Play and the App Store.',
       'Generated typed API clients from OpenAPI/Swagger and implemented offline-first storage with Drift, backed by CI/CD automation.',
     ],
     tech: [

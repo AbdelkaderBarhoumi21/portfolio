@@ -26,7 +26,8 @@ class WorkSection extends StatelessComponent {
           label: 'Selected work',
           title: ['Products I\'ve', '_shipped_ lately'],
           lede:
-              'Client apps across fitness, entertainment, commerce and IoT — '
+              'Client apps across fitness, entertainment, commerce, IoT and '
+              'healthcare — '
               'built in Flutter and native Android, live in the hands of users.',
         ),
         div(classes: 'work__stack', [

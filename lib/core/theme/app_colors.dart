@@ -35,6 +35,9 @@ abstract final class AppColors {
   static const String amberHex   = '#FFB547';
   static const String emeraldHex = '#3DDC97';
   static const String roseHex    = '#FF5C8A';
+  static const String goldHex    = '#F2C46D';
+  static const String orangeHex  = '#FF6B2C';
+  static const String blueHex    = '#4D86FF';
 
   /// Accent tones selectable from content data (`tone: 'amber'`).
   static const Map<String, String> tones = {
@@ -43,6 +46,9 @@ abstract final class AppColors {
     'amber': amberHex,
     'emerald': emeraldHex,
     'rose': roseHex,
+    'gold': goldHex,
+    'orange': orangeHex,
+    'blue': blueHex,
   };
 
   /// Brand gradient (logo, progress bar, selection accents).
