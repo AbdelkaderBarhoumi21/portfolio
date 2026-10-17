@@ -1,93 +1,110 @@
 # 03 — Animations
 
-All motion in this site is built on **vanilla CSS keyframes + a single
-IntersectionObserver script**. No animation libraries.
+Motion is **CSS transitions/keyframes + one vanilla-JS engine**, with
+[Lenis](https://github.com/darkroomengineering/lenis) (smooth scroll) and
+[GSAP](https://gsap.com) + ScrollTrigger (scrubbed/pinned scenes) as
+optional enhancers. Components never ship their own JS — they opt in with
+`data-*` attributes and classes.
 
 ## Anatomy
 
-- **CSS:** `lib/core/animations/animation_styles.dart` — `@css` getter
-  exporting all keyframes and `.reveal-*` utility classes.
-- **JS:** `lib/core/animations/animation_scripts.dart` — exports a Dart
-  `String` of vanilla JS that gets injected once via `Document(head: ...)`
-  in `main.server.dart` as a `<script>` tag.
+- **CSS:** `lib/core/animations/animation_styles.dart` — `@css` getter with
+  the keyframes, the reveal system and utilities (`.magnetic`, `.hover-line`).
+- **Vendors:** pinned URLs in `lib/core/constants/app_assets.dart`
+  (`lenis@1.3.11`, `gsap/3.13.0` + `ScrollTrigger`), loaded with `defer`
+  from `main.server.dart`.
+- **JS:** `lib/core/animations/animation_scripts.dart` exports two strings,
+  both injected via `Document(head: ...)` in `main.server.dart`:
+  - `bootstrapScript` — sync, before first paint. Adds `html.js is-loading`
+    and arms a 4.5s failsafe that adds `.reveal-all` if the engine never
+    starts.
+  - `animationScripts` — the engine. Runs on `DOMContentLoaded` (after the
+    deferred vendors), feature-detects `window.Lenis` / `window.gsap`.
+
+## Degradation
+
+| Condition                | Result                                                                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| JS disabled              | No `.js` class → no hidden states; static page, native scroll.                                                                                  |
+| CDN blocked / slow       | Engine still runs: reveals, nav, cursor work; native scroll, no GSAP scenes, Lab is a grid. Failsafe `.reveal-all` if nothing starts in 4.5s.   |
+| Engine throws            | Caught → `.reveal-all`, `is-loading` removed.                                                                                                   |
+| `prefers-reduced-motion` | No preloader, Lenis, cursor, magnetic, rotator or scenes; reveals show instantly; `global_styles.dart` zeroes all durations and hides `.grain`. |
+
+**Rule:** every hidden "from" state is gated under `.js` (`.js [data-reveal]`).
+
+## Preloader
+
+`Preloader` (`[data-preloader]`, `[data-preloader-count]`,
+`[data-preloader-bar]`) counts 0→100 then wipes up (`.is-done`). Shorter on
+repeat visits in the same tab (`sessionStorage`). When it ends the engine
+removes `is-loading`, starts Lenis and adds `.is-in` to every `[data-load]`
+element. A CSS `preloader-failsafe` animation lifts it regardless.
 
 ## The reveal pattern
 
-Every element that should animate on scroll gets one of these classes:
+The engine's IntersectionObserver adds `.is-in` once per element.
 
-| Class            | Effect                                         |
-| ---------------- | ---------------------------------------------- |
-| `reveal-up`      | opacity 0 → 1, translateY(24px) → 0            |
-| `reveal-left`    | opacity 0 → 1, translateX(-32px) → 0           |
-| `reveal-right`   | opacity 0 → 1, translateX(32px)  → 0           |
-| `reveal-scale`   | opacity 0 → 1, scale(0.95) → 1                 |
+| Markup                  | Effect                                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `data-reveal` (default) | opacity 0 → 1, `translateY(44px)` → 0                                               |
+| `data-reveal="fade"`    | opacity only                                                                        |
+| `data-reveal="scale"`   | `scale(0.94)` + 30px rise                                                           |
+| `data-reveal="clip"`    | `clip-path: inset(100% 0 0 0)` wipe up                                              |
+| `data-reveal="line"`    | hairline `scaleX(0)` → 1 from the left                                              |
+| `data-split`            | masked line reveal (`.line > .line__inner` slides up) — use the `SplitLines` widget |
+| `+ data-load`           | plays when the preloader ends instead of on scroll (hero)                           |
 
-Initial state: `opacity: 0; transform: ...; transition: 700ms cubic-bezier(0.22, 1, 0.36, 1)`.
-When the IntersectionObserver fires, it adds `is-visible` which sets opacity
-to 1 and clears the transform.
+## Stagger / delay
 
-## Stagger
+- `--d` — per-element delay, set inline: `'style': '--d: ${i * 80}ms'`.
+- `--i` — line index inside `SplitLines` (adds `i × 95ms`); `SplitLines`
+  sets it, and `delayMs:` maps to `--d`.
 
-Add `stagger` to a container; each direct child can carry `style="--i: N"`.
-Children share a base reveal class, and the CSS multiplies `--i` by ~80ms
-for `transition-delay`.
-
-```html
-<div class="stagger">
-  <div class="reveal-up" style="--i: 0">…</div>
-  <div class="reveal-up" style="--i: 1">…</div>
-  <div class="reveal-up" style="--i: 2">…</div>
-</div>
+```dart
+for (var i = 0; i < items.length; i++)
+  div(attributes: {'data-reveal': '', 'style': '--d: ${i * 80}ms'}, [...]),
 ```
 
-## Hero-specific effects
+## Engine features (attribute → behavior)
 
-- **Name entrance:** `name-enter` — opacity 0 + blur(12px) → blur(0).
-- **Typewriter:** `<span class="typewriter" data-words="A|B|C">` — the JS
-  cycles words, types each char, then erases.
-- **Gradient mesh background:** `hero-mesh` — a fixed pseudo-element with a
-  radial gradient that drifts via `@keyframes mesh-drift`.
+| Hook                                                            | Behavior                                                                                                                                                     |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a[href*="#"]` (same page)                                      | Glides via `lenis.scrollTo` (native smooth fallback); closes the menu.                                                                                       |
+| `[data-nav]`                                                    | `.is-scrolled` past 24px; `.is-hidden` on scroll-down, back on scroll-up.                                                                                    |
+| `[data-progress]`                                               | Scroll progress bar (`scaleX`).                                                                                                                              |
+| `[data-nav-link]` / `[data-menu-link]` + `[data-nav-indicator]` | ScrollSpy: `.is-active` on the link for the section at mid-viewport; the indicator pill slides under it. A section can borrow a link with `data-spy="<id>"`. |
+| `[data-menu-toggle]` + `[data-menu]`                            | Toggles `html.menu-open`; Esc closes; auto-closes ≥1024px.                                                                                                   |
+| `[data-count="5" data-pad="2"]`                                 | Counts up when 60% visible (`StatCounter`).                                                                                                                  |
+| `[data-rotator]` > `.rotator__item`                             | Cycles words every 2.6s (`is-active` / `is-leaving`).                                                                                                        |
+| `[data-clock="Africa/Tunis"]`                                   | Live HH:MM for that time zone (`LocalClock`).                                                                                                                |
+| `[data-cursor-ring]` / `-dot` / `-label`                        | Custom cursor (fine pointers only, `html.has-cursor`); ring lags at 0.15. `[data-cursor="Label"]` shows a label, links get `.is-link`.                       |
+| `.magnetic` (`data-magnetic="0.28"`)                            | Leans toward the pointer.                                                                                                                                    |
+| `[data-spotlight]`                                              | Writes `--mx` / `--my` for a pointer glow (cards). `[data-hero]` also gets `--px` / `--py`.                                                                  |
+| `[data-copy]` + `[data-copy-label]`                             | Copies to clipboard, shows `data-copied` text for 1.8s.                                                                                                      |
 
-## Navbar behaviors
+## GSAP scenes (`setupScenes`, only with GSAP and motion on)
 
-| Behavior                          | How                                         |
-| --------------------------------- | ------------------------------------------- |
-| Transparent → solid blurred on scroll | JS toggles `.is-scrolled` on `<nav>` past 40px |
-| Active section highlight (ScrollSpy)  | JS observes each `<section>` and toggles `.active` on the matching link |
-| Mobile hamburger (3 lines → X)        | `@client` `MobileNavToggle` flipping a class |
+| Scene              | Hooks                                                               | Notes                                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hero pull-back     | `#home`, `[data-hero-inner]`, `[data-hero-bg]`                      | content drifts up + fades, bg zooms                                                                                                                                      |
+| Scrubbed statement | `[data-words]` > `.w` (`ScrubText`)                                 | words go 0.13 → 1 opacity                                                                                                                                                |
+| Parallax           | `[data-parallax="0.15"]`, trigger `[data-parallax-root]`            |                                                                                                                                                                          |
+| Stacked work cards | `[data-stack-item]` > `.wcard` + `[data-shade]`                     | `(min-width: 900px) and (min-height: 800px)`; covered card scales to 0.9 and darkens                                                                                     |
+| Horizontal Lab     | `[data-hscroll]`, `[data-hscroll-track]`, `[data-hscroll-progress]` | `(min-width: 1024px) and (min-height: 700px)`; pins and adds `html.has-hscroll` only while active, so the horizontal layout never exists without the code that drives it |
+| Marquee skew       | `[data-marquee]` → `--skew`                                         | from Lenis velocity; the marquee itself is a CSS keyframe and runs without JS                                                                                            |
 
-## Project card 3D tilt
+## Keyframes (`animation_styles.dart`)
 
-A single JS listener on `.tilt` elements reads `mousemove`, computes
-`rotateX`/`rotateY` based on cursor offset from card center, and writes them
-as inline CSS custom properties (`--rx`, `--ry`). The CSS uses
-`transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry))`.
-
-On `mouseleave` the listener clears the props → CSS transitions back to flat.
-
-## Custom cursor
-
-A two-element cursor (dot + ring) follows `mousemove` with `requestAnimationFrame`.
-The ring uses easing (`current += (target - current) * 0.15`) to lag.
-It hides on touch devices via `@media (pointer: coarse) { display: none }`.
-
-## Reduced motion
-
-Every keyframe + transition is wrapped in:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  .reveal-up, .reveal-left, .reveal-right, .reveal-scale {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .typewriter::after { display: none; }
-}
-```
+`grain`, `orb-drift`, `marquee`, `pulse-dot`, `scroll-line`, `rise`,
+`spin`, `preloader-failsafe`.
 
 ## Easing
 
-Default: `cubic-bezier(0.22, 1, 0.36, 1)` — used everywhere unless a
-specific effect needs a punchier curve (e.g. `cubic-bezier(0.34, 1.56, 0.64, 1)`
-for button pops).
+| Var             | Curve                            | Use                               |
+| --------------- | -------------------------------- | --------------------------------- |
+| `--ease-out`    | `cubic-bezier(0.22, 1, 0.36, 1)` | default transitions               |
+| `--ease-expo`   | `cubic-bezier(0.16, 1, 0.3, 1)`  | reveals, line masks, button rolls |
+| `--ease-in-out` | `cubic-bezier(0.76, 0, 0.24, 1)` | clip wipes, curtains              |
+
+Typewriter and 3D tilt were removed — the hero uses the rotator, cards use
+the spotlight.
