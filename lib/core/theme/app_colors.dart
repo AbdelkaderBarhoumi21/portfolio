@@ -1,51 +1,64 @@
 // The project's color tokens.
 //
-// IMPORTANT — runtime values come from CSS variables, NOT hard-coded hex.
-// Each `AppColors.x` returns `Color('var(--x)')` which resolves at render
-// time. The actual hex values for both themes live in `:root` (dark) and
-// `[data-theme="light"]` (light), declared in `global_styles.dart`.
+// Two layers:
+//   1. Raw hex palette (`*Hex`) — read ONLY by `global_styles.dart`, which
+//      emits them once as CSS custom properties on `:root` (dark "ink") and
+//      on `.theme-paper` (light "paper" sections).
+//   2. Typed `Color('var(--x)')` refs — what sections/widgets use.
 //
-// Why: this lets the theme toggle flip ONE attribute on <html> and the
-// whole site recolors with a single CSS transition, without re-rendering
-// any Dart components.
-//
-// Brand colors (primary violet + secondary cyan) and their gradient stops
-// are intentionally NOT swapped between themes — they're brand identity.
-// Only neutral surfaces and text colors change.
+// Because every component reads `var(--x)`, a section can flip to the light
+// paper palette just by adding the `theme-paper` class: the custom
+// properties cascade and every child recolors with zero extra CSS.
 
 import 'package:jaspr/dom.dart';
 
 abstract final class AppColors {
-  // ----- Surfaces ----------------------------------------------------------
-  static const Color bg          = Color('var(--bg)');
-  static const Color bgAlt       = Color('var(--bg-alt)');
-  static const Color surface     = Color('var(--surface)');
+  // ----- Raw palette: ink (default, dark) --------------------------------
+  static const String inkBgHex      = '#09090B';
+  static const String inkRaisedHex  = '#111114';
+  static const String inkSurfaceHex = '#16161A';
+  static const String inkTextHex    = '#EDEDF0';
+  static const String inkDimHex     = '#9C9CA8';
+  static const String inkFaintHex   = '#5C5C68';
 
-  // ----- Glassmorphism -----------------------------------------------------
-  static const Color glassBg     = Color('var(--glass-bg)');
-  static const Color glassBorder = Color('var(--glass-border)');
+  // ----- Raw palette: paper (light sections) -----------------------------
+  static const String paperBgHex      = '#EEEDE8';
+  static const String paperRaisedHex  = '#E7E6E0';
+  static const String paperSurfaceHex = '#E1E0D9';
+  static const String paperTextHex    = '#0E0E11';
+  static const String paperDimHex     = '#55555E';
+  static const String paperFaintHex   = '#8D8D95';
 
-  // ----- Brand accents (same in both themes) -------------------------------
-  static const Color primary       = Color('#6C63FF'); // violet
-  static const Color secondary     = Color('#00D9FF'); // cyan
-  static const Color primarySoft   = Color('var(--primary-soft)');
-  static const Color secondarySoft = Color('var(--secondary-soft)');
+  // ----- Brand accents ----------------------------------------------------
+  static const String violetHex  = '#6C63FF';
+  static const String cyanHex    = '#00D9FF';
+  static const String amberHex   = '#FFB547';
+  static const String emeraldHex = '#3DDC97';
+  static const String roseHex    = '#FF5C8A';
 
-  // ----- Text --------------------------------------------------------------
-  static const Color textPrimary   = Color('var(--text-primary)');
-  static const Color textSecondary = Color('var(--text-secondary)');
-  static const Color textMuted     = Color('var(--text-muted)');
+  /// Accent tones selectable from content data (`tone: 'amber'`).
+  static const Map<String, String> tones = {
+    'violet': violetHex,
+    'cyan': cyanHex,
+    'amber': amberHex,
+    'emerald': emeraldHex,
+    'rose': roseHex,
+  };
 
-  // ----- Hairlines / dividers ----------------------------------------------
-  static const Color divider = Color('var(--divider)');
-
-  // ----- Semantic ----------------------------------------------------------
-  static const Color shadow = Color('var(--shadow)');
-
-  // ----- Gradient stops (raw strings used inside `linear-gradient(...)`) ---
-  // Brand identity — never swapped between themes.
-  static const String gradientStart = '#6C63FF';
-  static const String gradientEnd   = '#00D9FF';
+  /// Brand gradient (logo, progress bar, selection accents).
   static const String brandGradient =
-      'linear-gradient(135deg, $gradientStart, $gradientEnd)';
+      'linear-gradient(120deg, $violetHex, $cyanHex)';
+
+  // ----- Typed refs (use these in components) ----------------------------
+  static const Color bg            = Color('var(--bg)');
+  static const Color bgRaised      = Color('var(--bg-raised)');
+  static const Color surface       = Color('var(--surface)');
+  static const Color textPrimary   = Color('var(--text)');
+  static const Color textSecondary = Color('var(--text-dim)');
+  static const Color textMuted     = Color('var(--text-faint)');
+  static const Color line          = Color('var(--line)');
+  static const Color lineStrong    = Color('var(--line-strong)');
+  static const Color primary       = Color('var(--primary)');
+  static const Color secondary     = Color('var(--secondary)');
+  static const Color tone          = Color('var(--tone)');
 }
