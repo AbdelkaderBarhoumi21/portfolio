@@ -1,18 +1,16 @@
-// Animation stylesheet — all motion in this site comes from this file.
+// Animation stylesheet — the shared motion vocabulary of the site.
 //
-// Two pieces:
-//   1. `@keyframes` rules for any non-trivial motion (fade-up, mesh drift,
-//      caret blink, glow pulse, …).
-//   2. A small library of utility classes (`.reveal-up`, `.tilt`, `.glass`,
-//      `.gradient-text`, …) that components opt into.
+//   1. @keyframes (grain, orbs, marquee, pulses).
+//   2. The reveal system:
+//        [data-reveal]          → fade/slide in when scrolled into view
+//        [data-split] .line     → masked line-by-line text reveal
+//        [data-load]            → same, but played when the preloader ends
+//      JS (animation_scripts.dart) adds `.is-in` to play them.
+//   3. Utilities: .magnetic, .hover-line.
 //
-// The IntersectionObserver in `animation_scripts.dart` toggles `.is-visible`
-// on `.reveal-*` elements when they enter the viewport — the class itself
-// only declares the "from" and "to" states.
-//
-// Reduced motion is handled both globally (in `global_styles.dart`) and
-// here (extra overrides for visual properties that the global rule can't
-// neutralize — e.g. clearing translateY).
+// Hidden "from" states only apply under `html.js` (set by an inline head
+// script), so the page is fully readable with JavaScript disabled. If the
+// motion script fails, the head script adds `.reveal-all` as a failsafe.
 
 import 'package:jaspr/dom.dart';
 
@@ -21,207 +19,134 @@ List<StyleRule> get animationStyles => [
   // ===================================================================
   // 1. @keyframes
   // ===================================================================
-
-  // Hero name entrance — blur + opacity.
-  css.keyframes('name-enter', const {
-    '0%':   Styles(raw: {'opacity': '0', 'filter': 'blur(12px)'}),
-    '100%': Styles(raw: {'opacity': '1', 'filter': 'blur(0)'}),
+  css.keyframes('grain', const {
+    '0%, 100%': Styles(raw: {'transform': 'translate(0, 0)'}),
+    '10%': Styles(raw: {'transform': 'translate(-5%, -10%)'}),
+    '30%': Styles(raw: {'transform': 'translate(3%, -15%)'}),
+    '50%': Styles(raw: {'transform': 'translate(12%, 9%)'}),
+    '70%': Styles(raw: {'transform': 'translate(9%, 4%)'}),
+    '90%': Styles(raw: {'transform': 'translate(-1%, 7%)'}),
   }),
-
-  // Typewriter caret blink.
-  css.keyframes('caret-blink', const {
-    '0%, 100%': Styles(raw: {'opacity': '1'}),
-    '50%':      Styles(raw: {'opacity': '0'}),
+  css.keyframes('orb-drift', const {
+    '0%, 100%': Styles(raw: {'transform': 'translate3d(0, 0, 0) scale(1)'}),
+    '33%': Styles(raw: {'transform': 'translate3d(6%, -8%, 0) scale(1.08)'}),
+    '66%': Styles(raw: {'transform': 'translate3d(-5%, 5%, 0) scale(0.95)'}),
   }),
-
-  // Hero background gradient mesh drift.
-  css.keyframes('mesh-drift', const {
-    '0%':   Styles(raw: {'transform': 'translate3d(0, 0, 0) rotate(0deg)'}),
-    '50%':  Styles(raw: {'transform': 'translate3d(-3%, 2%, 0) rotate(8deg)'}),
-    '100%': Styles(raw: {'transform': 'translate3d(0, 0, 0) rotate(0deg)'}),
+  css.keyframes('marquee', const {
+    '0%': Styles(raw: {'transform': 'translate3d(0, 0, 0)'}),
+    '100%': Styles(raw: {'transform': 'translate3d(-50%, 0, 0)'}),
   }),
-
-  // Glow pulse for CTAs and the active timeline dot.
-  css.keyframes('glow-pulse', const {
-    '0%, 100%': Styles(raw: {
-      'box-shadow': '0 0 0 0 rgba(108, 99, 255, 0.55)',
-    }),
-    '50%': Styles(raw: {
-      'box-shadow': '0 0 0 12px rgba(108, 99, 255, 0)',
-    }),
+  css.keyframes('pulse-dot', const {
+    '0%': Styles(raw: {'box-shadow': '0 0 0 0 color-mix(in srgb, var(--success) 60%, transparent)'}),
+    '70%, 100%': Styles(raw: {'box-shadow': '0 0 0 9px transparent'}),
   }),
-
-  // Scroll-down arrow bob (used under the hero).
-  css.keyframes('bob', const {
-    '0%, 100%': Styles(raw: {'transform': 'translateY(0)'}),
-    '50%':      Styles(raw: {'transform': 'translateY(6px)'}),
+  css.keyframes('scroll-line', const {
+    '0%': Styles(raw: {'transform': 'scaleY(0)', 'transform-origin': 'top'}),
+    '45%': Styles(raw: {'transform': 'scaleY(1)', 'transform-origin': 'top'}),
+    '55%': Styles(raw: {'transform': 'scaleY(1)', 'transform-origin': 'bottom'}),
+    '100%': Styles(raw: {'transform': 'scaleY(0)', 'transform-origin': 'bottom'}),
+  }),
+  css.keyframes('rise', const {
+    '0%': Styles(raw: {'transform': 'translate3d(0, 110%, 0)'}),
+    '100%': Styles(raw: {'transform': 'translate3d(0, 0, 0)'}),
+  }),
+  css.keyframes('spin', const {
+    'to': Styles(raw: {'transform': 'rotate(360deg)'}),
+  }),
+  css.keyframes('preloader-failsafe', const {
+    'to': Styles(raw: {'transform': 'translate3d(0, -100%, 0)', 'visibility': 'hidden'}),
   }),
 
   // ===================================================================
-  // 2. Reveal utility classes
-  //    Initial hidden state + transition; JS adds `.is-visible` to play.
+  // 2a. Reveal — generic blocks.
   // ===================================================================
-
-  // Base reveal — the four variants share the same transition.
-  css('.reveal-up, .reveal-left, .reveal-right, .reveal-scale').styles(raw: {
+  css('.js [data-reveal]').styles(raw: {
     'opacity': '0',
+    'transform': 'translate3d(0, 44px, 0)',
     'transition':
-        'opacity 700ms var(--ease-out), '
-        'transform 700ms var(--ease-out), '
-        'filter 700ms var(--ease-out)',
-    'will-change': 'opacity, transform',
+        'opacity 1.1s var(--ease-out), '
+        'transform 1.3s var(--ease-expo), '
+        'clip-path 1.4s var(--ease-in-out)',
+    'transition-delay': 'var(--d, 0ms)',
   }),
-
-  css('.reveal-up').styles(raw: {'transform': 'translateY(24px)'}),
-  css('.reveal-left').styles(raw: {'transform': 'translateX(-32px)'}),
-  css('.reveal-right').styles(raw: {'transform': 'translateX(32px)'}),
-  css('.reveal-scale').styles(raw: {'transform': 'scale(0.95)'}),
-
-  // Visible state — JS adds this class.
-  css('.reveal-up.is-visible, '
-      '.reveal-left.is-visible, '
-      '.reveal-right.is-visible, '
-      '.reveal-scale.is-visible').styles(raw: {
+  css('.js [data-reveal="fade"]').styles(raw: {'transform': 'none'}),
+  css('.js [data-reveal="scale"]').styles(raw: {
+    'transform': 'scale(0.94) translate3d(0, 30px, 0)',
+  }),
+  css('.js [data-reveal="clip"]').styles(raw: {
     'opacity': '1',
     'transform': 'none',
+    'clip-path': 'inset(100% 0 0 0)',
+  }),
+  css('.js [data-reveal="line"]').styles(raw: {
+    'opacity': '1',
+    'transform': 'scaleX(0)',
+    'transform-origin': 'left center',
+  }),
+  css('.js [data-reveal].is-in').styles(raw: {
+    'opacity': '1',
+    'transform': 'none',
+    'clip-path': 'inset(0 0 0 0)',
   }),
 
   // ===================================================================
-  // 3. Stagger — children of `.stagger` use --i to delay their transition.
-  //    Set `style="--i: N"` inline on each child.
+  // 2b. Reveal — masked lines. Markup (see SplitLines widget):
+  //     <h2 data-split><span class="line"><span class="line__inner">…
   // ===================================================================
-  css('.stagger > *').styles(raw: {
-    'transition-delay': 'calc(var(--i, 0) * 80ms)',
+  css('.line').styles(raw: {
+    'display': 'block',
+    'overflow': 'hidden',
+    // Room for descenders + italic overhang, cancelled by negative margin
+    // so the mask doesn't change layout.
+    'padding': '0 0.1em 0.1em 0',
+    'margin': '0 -0.1em -0.1em 0',
+  }),
+  css('.line__inner').styles(raw: {'display': 'block'}),
+  css('.js [data-split] .line__inner').styles(raw: {
+    'transform': 'translate3d(0, 112%, 0) rotate(2.5deg)',
+    'transform-origin': 'left top',
+    'transition': 'transform 1.35s var(--ease-expo)',
+    'transition-delay': 'calc(var(--d, 0ms) + var(--i, 0) * 95ms)',
+  }),
+  css('.js [data-split].is-in .line__inner').styles(raw: {'transform': 'none'}),
+
+  // ===================================================================
+  // 2c. Failsafe — everything visible.
+  // ===================================================================
+  css('.reveal-all [data-reveal], .reveal-all [data-split] .line__inner').styles(raw: {
+    'opacity': '1 !important',
+    'transform': 'none !important',
+    'clip-path': 'none !important',
   }),
 
   // ===================================================================
-  // 4. Hero — name entrance + typewriter caret.
+  // 3. Utilities
   // ===================================================================
-  css('.name-enter').styles(raw: {
-    'animation': 'name-enter 1100ms var(--ease-out) both',
-  }),
-
-  css('.typewriter').styles(raw: {
-    'display': 'inline-block',
-    'border-right': '2px solid var(--secondary)',
-    'padding-right': '0.15em',
-    'animation': 'caret-blink 1s steps(1) infinite',
-    'white-space': 'nowrap',
-  }),
-
-  // ===================================================================
-  // 5. Hero mesh background — a fixed, blurred radial gradient that drifts.
-  // ===================================================================
-  css('.hero-mesh').styles(raw: {
-    'position': 'absolute',
-    'inset': '-20%',
-    'z-index': '0',
-    'pointer-events': 'none',
-    'background':
-        'radial-gradient(40% 40% at 30% 30%, rgba(108, 99, 255, 0.35), transparent 60%),'
-        'radial-gradient(40% 40% at 70% 60%, rgba(0, 217, 255, 0.28), transparent 60%)',
-    'filter': 'blur(60px) saturate(1.2)',
-    'animation': 'mesh-drift 18s ease-in-out infinite',
-  }),
-
-  // ===================================================================
-  // 6. Glass card surface.
-  // ===================================================================
-  css('.glass').styles(raw: {
-    'background': 'var(--glass-bg)',
-    'border': '1px solid var(--glass-border)',
-    'backdrop-filter': 'blur(10px) saturate(1.1)',
-    '-webkit-backdrop-filter': 'blur(10px) saturate(1.1)',
-    'border-radius': '20px',
-  }),
-
-  // ===================================================================
-  // 7. Gradient text (name, section titles).
-  // ===================================================================
-  css('.gradient-text').styles(raw: {
-    'background': 'var(--brand-gradient)',
-    'background-clip': 'text',
-    '-webkit-background-clip': 'text',
-    'color': 'transparent',
-    '-webkit-text-fill-color': 'transparent',
-  }),
-
-  // ===================================================================
-  // 8. 3D tilt — JS writes --rx / --ry as inline custom properties on hover.
-  //    Without JS the card sits flat; on mouseleave the script clears them.
-  // ===================================================================
-  css('.tilt').styles(raw: {
-    'transform-style': 'preserve-3d',
-    'transform':
-        'perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))',
-    'transition': 'transform 200ms var(--ease-out)',
-    'will-change': 'transform',
-  }),
-
-  // ===================================================================
-  // 8b. Magnetic — small elements lean toward the cursor on hover.
-  //     JS writes --mx / --my (in px) from mousemove; mouseleave clears.
-  //     We compose with any existing transform via translate3d(), which
-  //     is GPU-cheap and stacks predictably (no fight with .glow-hover).
-  // ===================================================================
+  // Magnetic elements: JS writes an inline transform; this eases it back.
   css('.magnetic').styles(raw: {
-    'transform': 'translate3d(var(--mx, 0px), var(--my, 0px), 0)',
-    'transition': 'transform 240ms var(--ease-out)',
+    'transition': 'transform 0.6s var(--ease-out)',
     'will-change': 'transform',
   }),
-  // Pointer-coarse devices (phones, tablets) skip the effect entirely.
-  css.media(MediaQuery.raw('(pointer: coarse)'), [
-    css('.magnetic').styles(raw: {'transform': 'none'}),
-  ]),
 
-  // ===================================================================
-  // 9. Glow on hover — used by CTAs and skill badges.
-  // ===================================================================
-  css('.glow-hover').styles(raw: {
-    'transition':
-        'transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out)',
+  // Animated underline for text links.
+  css('.hover-line').styles(raw: {
+    'position': 'relative',
+    'display': 'inline-block',
   }),
-
-  css('.glow-hover:hover').styles(raw: {
-    'transform': 'translateY(-2px) scale(1.03)',
-    'box-shadow': '0 12px 32px -8px rgba(108, 99, 255, 0.45)',
+  css('.hover-line::after').styles(raw: {
+    'content': '""',
+    'position': 'absolute',
+    'left': '0',
+    'right': '0',
+    'bottom': '-0.15em',
+    'height': '1px',
+    'background': 'currentColor',
+    'transform': 'scaleX(0)',
+    'transform-origin': 'right center',
+    'transition': 'transform 0.6s var(--ease-out)',
   }),
-
-  // Primary CTA — extra pulse on hover.
-  css('.glow-pulse:hover').styles(raw: {
-    'animation': 'glow-pulse 1.6s ease-out infinite',
+  css('.hover-line:hover::after, .hover-line:focus-visible::after').styles(raw: {
+    'transform': 'scaleX(1)',
+    'transform-origin': 'left center',
   }),
-
-  // ===================================================================
-  // 10. Scroll-indicator bob.
-  // ===================================================================
-  css('.bob').styles(raw: {
-    'animation': 'bob 2.4s ease-in-out infinite',
-  }),
-
-  // ===================================================================
-  // 11. Reduced-motion overrides — neutralize transforms, keep opacity.
-  // ===================================================================
-  css.media(MediaQuery.raw('(prefers-reduced-motion: reduce)'), [
-    css('.reveal-up, .reveal-left, .reveal-right, .reveal-scale').styles(raw: {
-      'opacity': '1',
-      'transform': 'none',
-    }),
-    css('.name-enter, .typewriter, .hero-mesh, .bob, .glow-pulse:hover')
-        .styles(raw: {
-      'animation': 'none',
-    }),
-    css('.typewriter').styles(raw: {
-      'border-right': '0',
-    }),
-    css('.tilt').styles(raw: {
-      'transform': 'none',
-    }),
-    css('.magnetic').styles(raw: {
-      'transform': 'none',
-    }),
-    css('.glow-hover:hover').styles(raw: {
-      'transform': 'none',
-    }),
-  ]),
 ];

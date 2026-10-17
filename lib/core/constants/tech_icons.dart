@@ -177,9 +177,12 @@ final Map<String, String> _icons = {
   'getx': _zap,
   'cleanarchitecture': _layers,
   'mvcmvvm': _layers,
+  'mvvm': _layers,
   'materialdesign3': _palette,
+  'material3': _palette,
   'responsiveui': _smartphone,
   'unitwidgetintegrationtesting': _checkSquare,
+  'testing': _checkSquare,
   // Android Native
   'kotlin': _kotlin,
   'jetpackcompose': _android,
@@ -196,8 +199,10 @@ final Map<String, String> _icons = {
   'laravel': _laravel,
   'jwt': _lock,
   'oauth2': _lock,
+  'auth': _lock,
   // Databases
   'firebase': _firebase,
+  'firebasefirestore': _firebase,
   'postgresql': _postgresql,
   'mysql': _mysql,
   'mongodb': _mongodb,
@@ -207,7 +212,12 @@ final Map<String, String> _icons = {
   'appwrite': _database,
   // APIs & Services
   'restapis': _api,
+  'rest': _api,
+  'openapi': _api,
   'openapiswagger': _api,
+  'getstreamio': _zap,
+  'ble': _zap,
+  'googlemaps': _map,
   'googlemapssdkapi': _map,
   'pushnotifications': _bell,
   'payments': _credit,
@@ -220,7 +230,9 @@ final Map<String, String> _icons = {
   'fastlane': _smartphone,
   'firebasecrashlytics': _alertCircle,
   'firebaseanalytics': _alertCircle,
+  'firebasecrashlyticsanalytics': _alertCircle,
   'figmauiux': _figma,
+  'figma': _figma,
 };
 
 /// Normalize a free-form skill label into a lookup key.

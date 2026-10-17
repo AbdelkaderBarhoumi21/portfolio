@@ -1,46 +1,37 @@
-// Experience timeline.
+// Experience — a light "paper" panel in the dark page, for rhythm.
 //
-// Composition:
-//   - SectionTitle "Experience" with mono eyebrow "02 / experience"
-//   - A `.timeline` column iterating `experiences` from data/.
-//     Each entry is a TimelineItem(experience: e, fromLeft: i.isEven) so
-//     adjacent cards reveal from opposite sides on scroll.
-//   - Uses the alternate background color so the section pops against
-//     the bio paragraphs above.
+// `.theme-paper` swaps the color custom properties, so every widget inside
+// (rows, chips, labels) recolors itself with no extra CSS.
 
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../../core/constants/app_anchors.dart';
-import '../../core/theme/app_theme.dart';
 import '../../data/experience_data.dart';
-import '../widgets/section_container.dart';
-import '../widgets/section_title.dart';
-import '../widgets/timeline_item.dart';
+import '../widgets/experience_row.dart';
+import '../widgets/section_header.dart';
 
 class ExperienceSection extends StatelessComponent {
   const ExperienceSection({super.key});
 
   @override
   Component build(BuildContext context) {
-    return SectionContainer(
+    return section(
       id: AppAnchors.experience,
-      altBg: true,
-      children: [
-        const SectionTitle(
-          eyebrow: '02 / experience',
-          title: 'Where I’ve worked',
-        ),
-
-        div(classes: 'timeline', [
-          for (final (i, exp) in experiences.indexed)
-            TimelineItem(
-              experience: exp,
-              // Alternate reveal direction per index. The dot/rail
-              // sit in a fixed column so only the card content slides
-              // in — kept readable, never jarring.
-              fromLeft: i.isEven,
-            ),
+      classes: 'section experience theme-paper',
+      [
+        div(classes: 'container', [
+          const SectionHeader(
+            index: '04',
+            label: 'Experience',
+            title: ['Where I\'ve', 'been _building_'],
+            lede:
+                'Leading mobile at a Tunis studio while shipping contract work '
+                'for teams in Dubai, Paris and Algiers.',
+          ),
+          div(classes: 'experience__list', [
+            for (final x in experiences) ExperienceRow(experience: x),
+          ]),
         ]),
       ],
     );
@@ -48,10 +39,12 @@ class ExperienceSection extends StatelessComponent {
 
   @css
   static List<StyleRule> get styles => [
-    css('.timeline').styles(
-      display: Display.flex,
-      flexDirection: FlexDirection.column,
-      gap: Gap(row: AppSpacing.xl.rem),
-    ),
+    css('.experience').styles(raw: {
+      'border-radius': 'var(--radius-xl)',
+      'margin-inline': 'clamp(0.5rem, 1vw, 1rem)',
+    }),
+    css('.experience__list').styles(raw: {
+      'border-bottom': '1px solid var(--line-strong)',
+    }),
   ];
 }

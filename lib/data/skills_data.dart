@@ -1,4 +1,5 @@
-// Grouped skill list rendered as monospace badges in the Skills section.
+// Grouped skill list rendered as rows in the Capabilities section,
+// plus the curated words that scroll through the marquee band.
 //
 // Order inside each group is curated, not alphabetical — the most important
 // or signature tools come first so the eye lands on them.
@@ -7,77 +8,53 @@ import '../domain/models/skill_group.dart';
 
 const List<SkillGroup> skillGroups = [
   SkillGroup(
-    title: 'Mobile',
+    title: 'Mobile — Flutter',
     skills: [
-      'Flutter',
-      'Dart',
-      'BLoC/Cubit',
-      'Riverpod',
-      'Provider',
-      'GetX',
-      'Clean Architecture',
-      'MVC/MVVM',
-      'Material Design 3',
-      'Responsive UI',
-      'Unit/Widget/Integration Testing',
+      'Flutter', 'Dart', 'BLoC/Cubit', 'Riverpod', 'GetX',
+      'Clean Architecture', 'MVVM', 'Material 3', 'Responsive UI',
+      'Testing (Unit/Widget/Integration)',
     ],
   ),
   SkillGroup(
     title: 'Android Native',
     skills: [
-      'Kotlin',
-      'Jetpack Compose',
-      'Java',
-      'XML Layouts',
-      'Android SDK',
-      'Migration: XML+Java → Kotlin+Compose',
+      'Kotlin', 'Jetpack Compose', 'XML Layouts', 'Java', 'Android SDK',
+      'Migration XML+Java → Kotlin+Compose',
     ],
   ),
   SkillGroup(
     title: 'Backend & Real-time',
     skills: [
-      'Rust (Axum)',
-      'Node.js (Express)',
-      'WebSockets (Socket.IO)',
-      'Stream.IO',
-      'PHP (Laravel)',
-      'JWT',
-      'OAuth2',
+      'Node.js (Express)', 'Rust (Axum)', 'PHP (Laravel)',
+      'WebSockets (Socket.IO)', 'Stream.io', 'Auth (JWT/OAuth2)',
     ],
   ),
   SkillGroup(
-    title: 'Databases',
+    title: 'Data & Storage',
     skills: [
-      'Firebase (Firestore)',
-      'PostgreSQL',
-      'MySQL',
-      'MongoDB',
-      'Drift',
-      'ObjectBox',
-      'Supabase',
-      'Appwrite',
+      'PostgreSQL', 'MySQL', 'MongoDB', 'Firebase/Firestore', 'Supabase',
+      'Appwrite', 'Drift', 'ObjectBox',
     ],
   ),
   SkillGroup(
-    title: 'APIs & Services',
+    title: 'DevOps & Tooling',
     skills: [
-      'REST APIs',
-      'OpenAPI/Swagger',
-      'Google Maps SDK/API',
-      'Push Notifications',
-      'Payments',
+      'Git/GitHub', 'CI/CD', 'Docker', 'Fastlane',
+      'Firebase Crashlytics/Analytics', 'REST', 'OpenAPI/Swagger', 'Figma',
     ],
   ),
-  SkillGroup(
-    title: 'DevOps & Quality',
-    skills: [
-      'Git/GitHub',
-      'CI/CD',
-      'Docker',
-      'Fastlane',
-      'Firebase Crashlytics',
-      'Firebase Analytics',
-      'Figma (UI/UX)',
-    ],
-  ),
+];
+
+/// Words for the infinite marquee band under the hero.
+const List<String> marqueeWords = [
+  'Flutter',
+  'Kotlin',
+  'Jetpack Compose',
+  'Dart',
+  'BLoC',
+  'Riverpod',
+  'Firebase',
+  'BLE & IoT',
+  'Rust',
+  'Clean Architecture',
 ];

@@ -1,43 +1,62 @@
-// Typography tokens — fonts, sizes, weights, line-heights.
+// Typography tokens — fonts, fluid sizes, weights, tracking.
 //
-// Font files are loaded via Google Fonts in `core/theme/global_styles.dart`.
-// This file only declares the names + scale.
+// Four families, each with one job:
+//   - Inter Tight  → display headings (tight, confident, editorial)
+//   - Instrument Serif (italic) → accent words inside headings (`_word_`)
+//   - Inter        → body copy
+//   - JetBrains Mono → small labels, indices, metadata
+//
+// Fonts load via the <link> in main.server.dart (`googleFontsUrl`).
+// Sizes are emitted as CSS custom properties in global_styles.dart so raw
+// CSS strings can reference them (`font-size: var(--fs-h2)`).
 
 import 'package:jaspr/dom.dart';
 
 abstract final class AppTypography {
-  // ----- Font families -----
-  // Use these with the typed `fontFamily:` API on StyleRule.
-  static const FontFamily fontBody = FontFamily('Inter');
-  static const FontFamily fontMono = FontFamily('JetBrains Mono');
+  // ----- Families ----------------------------------------------------------
+  static const FontFamily fontDisplay = FontFamily('Inter Tight');
+  static const FontFamily fontBody    = FontFamily('Inter');
+  static const FontFamily fontSerif   = FontFamily('Instrument Serif');
+  static const FontFamily fontMono    = FontFamily('JetBrains Mono');
 
-  // Convenience stacks (for places we need the raw CSS string).
-  static const String bodyStack = "'Inter', system-ui, -apple-system, Segoe UI, sans-serif";
-  static const String monoStack = "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+  static const String displayStack =
+      "'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif";
+  static const String bodyStack =
+      "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif";
+  static const String serifStack =
+      "'Instrument Serif', 'Iowan Old Style', 'Times New Roman', serif";
+  static const String monoStack =
+      "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
-  // ----- Font sizes (CSS values via Unit helpers) -----
-  // Headings use `clamp()` for fluid scaling — emitted as raw strings where
-  // the typed API does not support clamp().
-  static const String h1Clamp = 'clamp(2.5rem, 6vw, 5rem)';
-  static const String h2Clamp = 'clamp(2rem, 4vw, 3rem)';
-  static const String h3Clamp = 'clamp(1.25rem, 2vw, 1.5rem)';
+  static const String googleFontsUrl =
+      'https://fonts.googleapis.com/css2'
+      '?family=Inter:wght@400;500;600'
+      '&family=Inter+Tight:wght@400;500;600;700'
+      '&family=Instrument+Serif:ital@0;1'
+      '&family=JetBrains+Mono:wght@400;500'
+      '&display=swap';
 
-  // Typed sizes (px/rem) for non-clamp use.
-  static const Unit bodySize    = Unit.rem(1.0);
-  static const Unit smallSize   = Unit.rem(0.875);
-  static const Unit eyebrowSize = Unit.rem(0.75);
+  // ----- Fluid sizes (clamp) ----------------------------------------------
+  static const String displayClamp = 'clamp(3.4rem, 14.6vw, 15.5rem)';
+  static const String h2Clamp      = 'clamp(2.6rem, 7.2vw, 7rem)';
+  static const String h3Clamp      = 'clamp(1.7rem, 3.2vw, 3rem)';
+  static const String leadClamp    = 'clamp(1.55rem, 3.6vw, 3.4rem)';
+  static const String bodyLgClamp  = 'clamp(1.05rem, 1.25vw, 1.2rem)';
 
-  // ----- Weights -----
+  static const String bodySize  = '1rem';
+  static const String smallSize = '0.875rem';
+  static const String labelSize = '0.72rem';
+
+  // ----- Weights -----------------------------------------------------------
   static const FontWeight regular  = FontWeight.w400;
   static const FontWeight medium   = FontWeight.w500;
   static const FontWeight semibold = FontWeight.w600;
-  static const FontWeight bold     = FontWeight.w700;
 
-  // ----- Line heights -----
-  static const double lineHeightTight = 1.15;
-  static const double lineHeightBody  = 1.6;
-
-  // ----- Letter spacing (em) -----
-  static const Unit letterSpacingHeading = Unit.em(-0.02);
-  static const Unit letterSpacingEyebrow = Unit.em(0.18);
+  // ----- Rhythm ------------------------------------------------------------
+  static const String lineHeightDisplay = '0.92';
+  static const String lineHeightTight   = '1.05';
+  static const String lineHeightBody    = '1.6';
+  static const String trackingDisplay   = '-0.045em';
+  static const String trackingHeading   = '-0.035em';
+  static const String trackingLabel     = '0.14em';
 }
