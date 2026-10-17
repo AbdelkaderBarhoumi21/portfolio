@@ -1,25 +1,31 @@
 // Single source of truth for personal identity, contact info, and the
-// strings the hero section animates through.
+// copy blocks the hero / about / contact sections render.
 //
 // Section files MUST read from `ProfileData.*` instead of hardcoding any
 // name/email/url. If something here changes, the whole site updates.
+//
+// Copy conventions:
+//   - `_word_` wraps a word in the serif-italic accent style
+//     (parsed by core/utils/rich_text.dart).
 
 import '../domain/models/social_link.dart';
+import '../domain/models/stat.dart';
 
 abstract final class ProfileData {
   // ---------- Identity ----------
   static const String name      = 'Barhoumi Abdelkader';
   static const String firstName = 'Abdelkader';
+  static const String lastName  = 'Barhoumi';
+  static const String initials  = 'AB';
   static const String role      = 'Mobile Software Engineer';
-  static const String subRole   = 'Flutter & Android Developer';
+  static const String subRole   = 'Flutter & Android';
   static const String location  = 'Tunis, Tunisia';
 
-  static const String greeting  = "Hi, I'm";
-  static const String tagline   =
-      'Building high-performance cross-platform apps with clean architecture.';
+  /// IANA zone used by the live local-time clock in the hero + footer.
+  static const String timeZone      = 'Africa/Tunis';
+  static const String timeZoneLabel = 'GMT+1';
 
-  /// Words that cycle through the typewriter span in the hero section.
-  /// Joined with '|' as the `data-words` attribute consumed by the JS.
+  /// Words that cycle through the rotator in the hero role line.
   static const List<String> heroRoles = [
     'Flutter Developer',
     'Android Engineer',
@@ -27,35 +33,57 @@ abstract final class ProfileData {
     'IoT Specialist',
   ];
 
-  // ---------- Stats (used on the About section highlight cards) ----------
-  static const String yearsExperience = '1+';
-  static const String appsShipped     = '5+';
-  static const String spokenLanguages = '3';
+  /// Short intro under the hero name.
+  static const String heroIntro =
+      'I lead the mobile department at Oxton Digital — shipping Flutter and '
+      'native Android apps for clients in France, the UAE, Algeria and Tunisia.';
 
-  // ---------- Current status (the "Now" bento card) ----------
-  /// Short, present-tense sentence shown on the About bento.
-  static const String nowDoing  = 'Building Sparta Coaching at Oxton Digital';
-  /// Where the current focus is, as a tiny chip ("on-site", "remote", …).
-  static const String nowPlace  = 'Tunis · on-site';
-  /// Optional tagline under the now sentence.
-  static const String nowDetail =
-      'Cross-platform fitness app — Flutter, BLoC, GetStream.IO, Firebase Crashlytics.';
+  /// Status pill in the hero.
+  static const String status = 'Available for new projects';
 
-  // ---------- One-liner about how I work (Philosophy bento card) ----------
-  static const String philosophy =
-      'Ship clean architecture, write tests where state hurts, and treat the '
-      'edge cases as first-class citizens — every BLE drop, offline tap, and '
-      'app-resume should feel like part of the product.';
+  // ---------- About ----------
+  /// Large scroll-scrubbed statement. `_word_` = serif accent.
+  static const String statement =
+      'I build mobile products that feel _effortless_ — Flutter and native '
+      'Android apps with clean architecture, real-time features and '
+      'offline-first data, taken from the first commit all the way to the '
+      '_stores._';
 
-  // ---------- Quick "available for" line ----------
+  static const List<String> bio = [
+    "I'm a Mobile Software Engineer based in Tunis, currently leading the "
+        'mobile department at Oxton Digital, where I oversee Flutter and native '
+        'Android delivery across client projects.',
+    'My background is in embedded systems and mechatronics — which is why I '
+        'enjoy the hard edges of mobile: BLE and Wi-Fi device links, '
+        'offline-first sync, real-time chat and payment flows that simply work.',
+  ];
+
+  /// Label / value rows on the About section.
+  static const List<({String label, String value})> facts = [
+    (label: 'Currently', value: 'Mobile Lead @ Oxton Digital'),
+    (label: 'Based in', value: 'Tunis, Tunisia'),
+    (label: 'Focus', value: 'Flutter · Android · IoT'),
+    (label: 'Languages', value: 'Arabic · English · French'),
+  ];
+
+  /// Headline numbers (count-up on scroll).
+  static const List<Stat> stats = [
+    Stat(value: 5, suffix: '+', label: 'Apps shipped to production'),
+    Stat(value: 4, label: 'Countries served'),
+    Stat(value: 9, label: 'Certifications completed'),
+    Stat(value: 3, label: 'Languages spoken'),
+  ];
+
+  // ---------- Availability / contact copy ----------
   static const String availability =
-      'Open to mobile engineering roles, freelance builds, and IoT projects.';
+      'Open to mobile engineering roles, freelance builds and IoT projects. '
+      'Tell me what you are building — I usually reply within a day.';
 
   // ---------- Spoken languages ----------
   static const List<String> languages = [
     'Arabic (Native)',
-    'English (B2)',
-    'French (B2)',
+    'English (IELTS B2)',
+    'French (DELF B2)',
   ];
 
   // ---------- Contact ----------
@@ -63,13 +91,15 @@ abstract final class ProfileData {
   static const String phone    = '+216 20 778 960';
   static const String linkedin = 'https://www.linkedin.com/in/barhoumi23176';
   static const String github   = 'https://github.com/AbdelkaderBarhoumi21';
+  static const String linkedinHandle = 'in/barhoumi23176';
+  static const String githubHandle   = 'AbdelkaderBarhoumi21';
 
   /// `mailto:` href used by the contact CTA.
   static const String mailto = 'mailto:$email';
   /// `tel:` href used by the contact card.
   static const String telHref = 'tel:+21620778960';
 
-  // ---------- CV download (place the file in `web/`) ----------
+  // ---------- CV download (file lives in `web/`) ----------
   static const String cvPath = 'cv/Mobile_Abdelkader_Barhoumi_CV.pdf';
 
   // ---------- Social links ----------

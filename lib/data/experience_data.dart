@@ -1,10 +1,7 @@
-// Professional experience timeline data.
+// Professional experience data — mirrors the CV.
 //
-// Order: current roles first (both "Present"), then past roles in
-// reverse chronological order.
-//
-// Bullets follow the content-writer voice: lead with verbs, ≤22 words each,
-// concrete tech named explicitly. See .claude/agents/content-writer.md.
+// Order: current roles first, then past roles in reverse chronological order.
+// Bullets lead with verbs and name concrete tech explicitly.
 
 import '../domain/models/experience.dart';
 
@@ -12,37 +9,36 @@ const List<Experience> experiences = [
   // ---- Current ----------------------------------------------------------
   Experience(
     company: 'Oxton Digital',
-    role: 'Mobile Software Engineer — Flutter & Android',
-    location: 'Tunis, Tunisia · On-site',
-    period: 'Apr 2026 – Present',
+    role: 'Mobile Lead — Flutter & Android',
+    location: 'Tunis, Tunisia',
+    employment: 'Full-time · On-site',
+    period: 'Apr 2026 — Present',
+    current: true,
     bullets: [
-      'Built Sparta Coaching, a cross-platform fitness app with workout tracking, exercise library, and training-plan management.',
-      'Integrated GetStream.IO real-time chat and Firebase Crashlytics for production monitoring on the Flutter client.',
-      'Migrated a production Android Bowling app from Java + XML to Kotlin + Jetpack Compose under Clean Architecture.',
+      'Lead the Mobile Department, overseeing Flutter and native Android delivery across client projects.',
+      'Managed the migration of the Fun Bowling entertainment app (Digi Service, France) from XML + Java to Kotlin + Jetpack Compose, introducing Clean Architecture and modern UI patterns.',
+      'Built Sparta Coaching, a cross-platform fitness app for iOS and Android with BLoC/Cubit, real-time chat via GetStream.io and Firebase Crashlytics monitoring.',
     ],
     tech: [
-      'Flutter', 'Dart', 'BLoC/Cubit',
-      'Kotlin', 'Jetpack Compose', 'Java', 'XML',
-      'GetStream.IO', 'Firebase Crashlytics', 'FCM',
-      'Clean Architecture', 'REST APIs',
+      'Flutter', 'Dart', 'BLoC/Cubit', 'Kotlin', 'Jetpack Compose', 'Java',
+      'GetStream.io', 'Firebase', 'Clean Architecture', 'REST APIs',
     ],
   ),
   Experience(
     company: 'Stoneslane',
     role: 'Mobile Engineer — Flutter',
-    location: 'Dubai, UAE · Remote',
-    period: 'Oct 2025 – Present',
+    location: 'Dubai, UAE',
+    employment: 'Contract · Remote',
+    period: 'Oct 2025 — Present',
+    current: true,
     bullets: [
-      'Shipped a B2B e-commerce app covering authentication, catalog, cart/checkout, order tracking, and push notifications.',
-      'Integrated REST APIs and payment gateways; tuned UI performance with modular BLoC/Cubit slices.',
-      'Built offline persistence on ObjectBox and a Fastlane CI/CD pipeline, publishing to Google Play and the App Store.',
+      'Delivered Masdary, a B2B e-commerce app (auth, catalog, cart/checkout, order tracking, push) published to Google Play and the App Store.',
+      'Integrated REST APIs and payment gateways; structured the UI into scalable BLoC/Cubit modules with unit, widget and integration tests.',
+      'Added offline persistence with ObjectBox and fast product discovery with Algolia search.',
     ],
     tech: [
-      'Flutter', 'Dart', 'BLoC/Cubit',
-      'REST APIs', 'ObjectBox',
-      'Firebase (Auth, FCM, Crashlytics, Performance, Remote Config)',
-      'Algolia', 'Google Maps', 'Payments',
-      'CI/CD', 'Fastlane', 'Docker',
+      'Flutter', 'BLoC/Cubit', 'ObjectBox', 'Algolia', 'Firebase',
+      'Google Maps', 'Payments', 'Fastlane', 'Docker',
     ],
   ),
 
@@ -50,35 +46,31 @@ const List<Experience> experiences = [
   Experience(
     company: 'Sifartek',
     role: 'Mobile Software Engineer — Flutter',
-    location: 'Algiers, Algeria · Remote',
-    period: 'Feb 2026 – Apr 2026',
+    location: 'Algiers, Algeria',
+    employment: 'Contract · Remote',
+    period: 'Feb 2026 — Apr 2026',
     bullets: [
-      'Optimized a Flutter app for seamless IoT sensor connectivity over BLE (MDS, Nordic) and Wi-Fi protocols.',
-      'Implemented Drift-backed local storage for offline-first usage with automatic cloud synchronization.',
-      'Set up unit, widget, and integration tests against Firebase services to guarantee data consistency.',
+      'Built BLE and Wi-Fi connectivity layers for reliable IoT sensor integration in the Wergo Flutter app.',
+      'Implemented offline-first local storage with Drift and automatic cloud synchronization to keep data consistent across devices.',
     ],
     tech: [
-      'Flutter', 'Dart', 'BLoC/Cubit',
-      'BLE (MDS, Nordic)', 'OpenAPI', 'Drift',
-      'Firebase (Storage, Cloud, FCM, Auth, Crashlytics)',
-      'Cloud Sync', 'Testing',
+      'Flutter', 'BLoC/Cubit', 'BLE (MDS, Nordic)', 'OpenAPI', 'Drift',
+      'Firebase', 'Cloud Sync', 'Testing',
     ],
   ),
   Experience(
     company: 'Nexits',
     role: 'Mobile Engineer — Flutter',
-    location: 'Paris, France · Remote',
-    period: 'Oct 2025 – Dec 2025',
+    location: 'Paris, France',
+    employment: 'Contract · Remote',
+    period: 'Oct 2025 — Dec 2025',
     bullets: [
-      'Built a healthcare app with appointments, patient profiles, notifications, and role-based access control.',
-      'Generated typed API clients from OpenAPI/Swagger with openapi-generator for a safer integration surface.',
-      'Established Drift offline storage and an automated CI/CD pipeline; shipped to Google Play and the App Store.',
+      'Built a healthcare app (appointments, patient profiles, notifications, role-based access control) published to Google Play and the App Store.',
+      'Generated typed API clients from OpenAPI/Swagger and implemented offline-first storage with Drift, backed by CI/CD automation.',
     ],
     tech: [
-      'Flutter', 'Dart', 'Riverpod',
-      'REST APIs', 'OpenAPI/Swagger', 'openapi-generator',
-      'Drift', 'Firebase',
-      'CI/CD', 'Fastlane',
+      'Flutter', 'Riverpod', 'OpenAPI/Swagger', 'openapi-generator', 'Drift',
+      'Firebase', 'CI/CD', 'Fastlane',
     ],
   ),
 ];
